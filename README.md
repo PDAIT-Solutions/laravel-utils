@@ -1,9 +1,19 @@
 # Larvel Utils
 Laravel utils is fine way to speed up your common tasks in Larvel +5.8.
 
-# Doc
-Right now only doc available in Polish:
+## Main features
+You can use only of utils or if You need more you can use all of them: 
+* Powered usage of bootstrap table plugin: https://bootstrap-table.com/ - to direct and fast use in Laravel
+* Automatic Ajax form used by jQuery with complex validation
+* Simple and ultra-fast usage of user roles
+* Simple and ultra-fast usage of user localization
+* Bundle of js function helper
 
+## Doc
+EN: 
+http://dev.pdait.pl/doc/laravel-utils/pl/
+
+PL: 
 http://dev.pdait.pl/doc/laravel-utils/pl/
 
 ## License
