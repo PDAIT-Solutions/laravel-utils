@@ -1,9 +1,9 @@
 {
   "name": "pdait/laravel-utils",
-  "description": "This is package for use in internall projects in Laravel 5.7+",
+  "description": "This package includes some boosts to speed up common Laravel ^5.8 tasks",
   "require": {
     "php": "^7.1.3",
-    "laravel/framework": "^5.7"
+    "laravel/framework": "^5.8"
   },
   "extra": {
     "laravel": {

@@ -16,36 +16,7 @@
 
             <h2>Instalacja</h2>
             <h4>Krok 1</h4>
-            <p>
-                Do pliku <code>composer.json</code> dodaj:
-            </p>
-
-            <pre>
-"repositories": [
-    {
-         "type": "vcs",
-         "url": "ssh://develope@dev.pdait.pl:2200/home/develope/pdait/laravel-utils/"
-    }
-]            </pre>
-
-            <p>
-                następnie w konsoli wpisz:
-            </p>
-
-            <pre>composer require pdait/laravel-utils "dev-master"</pre>
-
-            <p>
-                Zostaniesz poproszony o hasło prywatnego repozytorium.
-            </p>
-            <div class="alert alert-info">
-                Jeżeli nie zostaniesz poproszony o hasło, a zamiast tego dostaniesz błąd VCS driver'a zmień terminal -
-                testowane w PhpStorm + Git bash - w tym nie działa.
-            </div>
-
-            <div class="alert alert-info">
-                O hasło będziesz proszony więcej niż raz.
-            </div>
-
+            <pre>composer require pdait/laravel-utils "^1.0"</pre>
 
             <h4>Krok 2</h4>
             <p>
