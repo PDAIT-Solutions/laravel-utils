@@ -12,8 +12,9 @@ trait Queryable
 {
     /**
      * @param        $model
-     * @param        $inputName
+     * @param        $input
      * @param        $columns
+     * @param string $check
      * @param string $columnsType
      *
      * @return mixed
@@ -21,7 +22,7 @@ trait Queryable
     public function addWhere($model, $input, $columns, $check = '=', $columnsType = 'or')
     {
         // Firstlly we check if $inputName exists in Request
-        if ($input || $input === 0 || $input === '0') {
+        if (($input || $input === 0 || $input === '0') && $input !== '%' && $input !== '%%') {
 
             // Secondly we check if $columns is iterable (PHP flexity)
             if (is_iterable($columns)) {
@@ -31,11 +32,11 @@ trait Queryable
 
                     // Addding or wheres in anonymous function
                     $model = $model->where(
-                            function ($query) use (&$input, &$columns, &$check) {
-                                foreach ($columns as $column) {
-                                    $query = $query->orWhere($column, $check, $input);
-                                }
+                        function ($query) use (&$input, &$columns, &$check) {
+                            foreach ($columns as $column) {
+                                $query = $query->orWhere($column, $check, $input);
                             }
+                        }
                     );
                 } elseif ($columnsType == 'and') {
 

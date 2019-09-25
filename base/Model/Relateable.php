@@ -19,7 +19,7 @@ trait Relateable
     private $addedSelf = false;
 
     /**
-     * @param  Builder  $builder
+     * @param Builder $builder
      * @param         $className
      *
      * @return Builder
@@ -29,16 +29,19 @@ trait Relateable
 
         $model = $this->getExternallModel($className);
         $shortClassName = $this->getShortClassName($className);
-        foreach (func_get_args() as $key => $joinedClassName) {
-            if ($key > 1) {
-                $joinedShortClassName = $this->getShortClassName($joinedClassName);
-                $shortClassName = $joinedShortClassName.'.'.$shortClassName;
+        $joinedClassName = null;
+        if (count(func_get_args()) > 2) {
+            foreach (func_get_args() as $key => $joinedClassName) {
+                if ($key > 1) {
+                    $joinedShortClassName = $this->getShortClassName($joinedClassName);
+                    $shortClassName = $joinedShortClassName.'.'.$shortClassName;
+                }
             }
         }
 
         $builder = $builder->withJoin($shortClassName);
 
-        if (!$this->addedSelf) {
+        if ( ! $this->addedSelf) {
             foreach ($this->getModelColumnsWithoutAlias($this) as $alias => $name) {
                 $builder = $builder->addSelect($name.' AS '.$alias);
             }
@@ -63,9 +66,9 @@ trait Relateable
     }
 
     /**
-     * @param  Model  $model
-     * @param  string  $className
-     * @param  string|null  $joinedClassName
+     * @param Model       $model
+     * @param string      $className
+     * @param string|null $joinedClassName
      *
      * @return array
      */
@@ -73,9 +76,12 @@ trait Relateable
     {
         $singular = $this->getClassSingular($className);
 
+
         if ($joinedClassName) {
             $joinedSingular = $this->getClassSingular($joinedClassName);
+
             $singular = $joinedSingular.'_'.$singular;
+
         }
 
         $tableName = $model->getTable();
@@ -94,8 +100,8 @@ trait Relateable
     }
 
     /**
-     * @param  Model  $model
-     * @param  string  $className
+     * @param Model  $model
+     * @param string $className
      *
      * @return array
      */
@@ -117,7 +123,7 @@ trait Relateable
     }
 
     /**
-     * @param  string  $className
+     * @param string $className
      *
      * @return string
      */
@@ -134,7 +140,7 @@ trait Relateable
     }
 
     /**
-     * @param  string  $className
+     * @param string $className
      *
      * @return bool|string
      */
