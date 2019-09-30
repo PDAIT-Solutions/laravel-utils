@@ -50,6 +50,7 @@ trait Paginationable
      * @param            $collection
      * @param array|null $collectionData
      *
+     *
      * @return Collection
      */
     public function getCollectionWithoutPagination($model, $collection, ?array $collectionData = [])
