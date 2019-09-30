@@ -44,4 +44,22 @@ trait Paginationable
 
         return new Collection($model, $collection, $data);
     }
+
+    /**
+     * @param            $model
+     * @param            $collection
+     * @param array|null $collectionData
+     *
+     * @return Collection
+     */
+    public function getCollectionWithoutPagination($model, $collection, ?array $collectionData = [])
+    {
+        $model = $model->get();
+
+        $data = new Data();
+
+        $data->setCollectionData($collectionData);
+
+        return new Collection($model, $collection, $data);
+    }
 }
