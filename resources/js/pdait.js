@@ -69,10 +69,11 @@ global.rowStyle = function rowStyle (row, index) {
  *
  * @param id
  * @param route
+ * @param excludedColumns
  */
-global.registerTableLink = function registerTableLink (id, route) {
+global.registerTableLink = function registerTableLink (id, route, excludedColumns) {
     $(id).on('click-cell.bs.table', function (field, value, row, element) {
-        if (value != 'actions') {
+        if (value != 'actions' && value != '0' && !excludedColumns.includes(value)) {
             document.location = route.replace('__id__', element.id)
         }
     })
@@ -91,7 +92,7 @@ global.registerTableLink = function registerTableLink (id, route) {
 $('body').on('click', '.btn-clear-form', function () {
     var $form = $(this).closest('form')
     cleanForm($form)
-    $form.submit()
+    $form.find('button[type="submit"]').click()
 })
 
 /**
@@ -132,10 +133,10 @@ global.activeAjaxForm = function activeAjaxForm () {
 }
 
 $(document).on('ajaxify:process_start', 'form', function () {
-    $(this).find('button[type="submit"],input[type=submit]').attr('disabled', 'disabled')
+    $(this).find('button[type="submit"],input[type=submit]').append(' <i class="fas fa-spinner fa-spin"></i>').attr('disabled', 'disabled')
 })
 $(document).on('ajaxify:process_finish', 'form', function () {
-    $(this).find('button[type="submit"],input[type=submit]').removeAttr('disabled')
+    $(this).find('button[type="submit"],input[type=submit]').removeAttr('disabled').find('.fa-spinner').remove()
 })
 
 /**
@@ -156,7 +157,7 @@ global.ajaxify_submitForm = function ajaxify_submitForm (el) {
     ajaxify_sendAjaxRequest(action, method, formData, function (data) {
 
         ajaxify_processData($el, data)
-        $el.trigger('ajaxify:process_finish')
+        $el.trigger('ajaxify:process_finish', data)
     })
 }
 
@@ -185,11 +186,12 @@ global.ajaxify_sendAjaxRequest = function ajaxify_sendAjaxRequest (action, metho
  * @param data
  */
 global.ajaxify_processData = function ajaxify_processData ($el, data) {
+
     // Przetwarzanie wyniku
     if (typeof data.data !== 'undefined' && data.data.status == 'success') {
         $el.trigger('ajaxify:form_success', [data.data]) // Wysłanie customowego eventa
     } else {
-        $el.trigger('ajaxify:form_errors', [data.responseJSON, data]) // Wysłanie customowego eventa
+        $el.trigger('ajaxify:form_errors', [data.responseJSON]) // Wysłanie customowego eventa
     }
 }
 
@@ -210,7 +212,7 @@ global.dump = function dump (data) {
 $(document).on('ajaxify:form_errors', 'form', function (e, data) {
     console.log(data)
     var $form = $(this)
-    $(this).find('button[type="submit"]').removeAttr('disabled')
+    $(this).find('button[type="submit"]').removeAttr('disabled').find('.fa-spinner').remove()
 
     var animated = false
 
@@ -280,7 +282,7 @@ global.animateToElem = function animateToElem ($el) {
 /**
  * Event ajaxify:process_start
  */
-$(document).on('ajaxify:process_start', 'form', function () {
+$(document).on('ajaxify:process_start', 'form', function (e) {
     $el = $(this)
     $el.find('label').removeClass('text-danger')
     $el.find('.a2lix_translations .nav-link').removeClass('text-danger')
@@ -299,9 +301,9 @@ $(document).on('ajaxify:form_success', 'form', function (e, data) {
         succesAction = $(this).data('success-action')
         window.location.href = succesAction
     } else if ($(this)[0].hasAttribute('data-no-success-action') && $(this).data('no-success-action')) {
-        $(this).trigger('ajaxify:form_success_no_action')
+        $(this).trigger('ajaxify:form_success_no_action', data)
     } else {
-        $(this).trigger('ajaxify:form_success_no_redirect')
+        $(this).trigger('ajaxify:form_success_no_redirect', data)
     }
 })
 
