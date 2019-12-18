@@ -53,6 +53,16 @@ $('.pda-table-form').submit(function () {
   })
 })
 
+$('body').on('page-change.bs.table', function () {
+  $('.page-jump-to, .fixed-table-pagination li, .fixed-table-pagination ul, .fixed-table-pagination a').addClass('pe-none')
+  $('.page-jump-to, .fixed-table-pagination a').addClass('disabled-pagination-item')
+})
+
+$('body').on('load-success.bs.table', function () {
+  $('.page-jump-to, .fixed-table-pagination li, .fixed-table-pagination ul, .fixed-table-pagination a').removeClass('pe-none')
+  $('.page-jump-to, .fixed-table-pagination a').removeClass('disabled-pagination-item')
+})
+
 /**
  * Dzięki tej funkcji przy wysłaniu w ajaxie class zostanie dodana klasa do rowa tabeli
  *
@@ -354,12 +364,13 @@ $(document).on('ajaxify:form_success_no_redirect', 'form', function () {
 |  ALERTY
 |
 --------------------------------------------------------------------------------------------------------------------- */
+
 /**
  * Dość felxi funkcja do dodawania alertów, myślę, że na nasze potrzeby wystarczy
  *
  * @param message
  * @param type
- * @param strong
+ * @param strongd
  */
 global.showAlert = function showAlert (message, type, strong = false) {
   var id = makeId()
@@ -375,7 +386,8 @@ global.showAlert = function showAlert (message, type, strong = false) {
     '</div>' +
     '</div>'
   $('body').append(html)
-
+  $('#' + id).hide()
+  $('#' + id).slideDown('fast')
   setTimeout(function () {
     $('#' + id).fadeOut(500)
     setTimeout(function () {
