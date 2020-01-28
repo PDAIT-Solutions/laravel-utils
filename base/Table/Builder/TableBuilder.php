@@ -2,7 +2,6 @@
 
 namespace PDAit\Base\Table\Builder;
 
-
 use PDAit\Base\Table\Block\Thead;
 use PDAit\Base\Table\Model\Table;
 
@@ -26,7 +25,7 @@ trait TableBuilder
     /**
      * @return Thead
      */
-    public function prepare($id, $url): Thead
+    protected function prepare($id, $url): Thead
     {
         $this->table = new Table($id, $url);
         $this->thead = new Thead();
@@ -38,7 +37,7 @@ trait TableBuilder
     /**
      * @return Table
      */
-    public function getTable(): Table
+    protected function getTable(): Table
     {
         return $this->table;
     }
