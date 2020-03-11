@@ -17,6 +17,9 @@ trait Roleable
      */
     public function hasRole(string $role)
     {
+        if (!is_iterable($this->roles)) {
+            return false;
+        }
         return in_array($role, $this->roles);
     }
 
