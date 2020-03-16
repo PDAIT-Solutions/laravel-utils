@@ -423,3 +423,8 @@ $('body').on('click', '[data-modal]', function () {
     $(window).trigger('modal-loaded')
   })
 })
+
+String.prototype.replaceAll = function (search, replacement) {
+    var target = this;
+    return target.split(search).join(replacement);
+};
