@@ -139,7 +139,7 @@ global.cleanForm = function cleanForm ($el) {
     .prop('selected', false)
     .prop('selected', false)
 
-  $('input,select,textarea').trigger('change')
+  $el.find('input,select,textarea').trigger('change')
 
   $el.find('.select2-selection__choice__remove').click()
   $el.find('.select2[multiple]').select2('close')
