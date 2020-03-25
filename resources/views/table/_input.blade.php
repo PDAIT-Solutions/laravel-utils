@@ -13,7 +13,7 @@
     {!! !array_key_exists('type', $input->getAttrs()) ? 'type="text"' : ''  !!}
     {!! !array_key_exists('class', $input->getAttrs()) ? 'class="form-control pda-table-form-input"' : ''  !!}
     {!! !array_key_exists('name', $input->getAttrs()) ? 'name="'.$input->getName().'"' :'' !!}
-    {!! !array_key_exists('id', $input->getAttrs()) ? 'id="'.$input->getName().'"' :'' !!}
+    {!! !array_key_exists('id', $input->getAttrs()) ? 'id="'.$table->getId().'-'.$input->getName().'"' :'' !!}
     {!! !array_key_exists('data-cookie-id', $input->getAttrs()) ? 'data-cookie-id="'.$table->getId().'-'.$input->getName().'-input"' :'' !!}
     @foreach ($input->getAttrs() as $attr => $value)
         {{ $attr }}="{{ $value }}"
