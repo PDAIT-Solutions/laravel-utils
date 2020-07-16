@@ -689,7 +689,11 @@ $(() => {
         }
 
         function makeApiCall() {
-            api(endpointUrl, {}, refreshTable)
+            $(target).prop('disabled', true)
+            api(endpointUrl, {}, () => {
+                refreshTable()
+                $(target).prop('disabled', false)
+            })
         }
 
         function displayConfirmModal() {
