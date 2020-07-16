@@ -465,12 +465,10 @@ window.api= function api(url, body, handleData) {
             if (data.status === false && typeof data.message != 'undefined')
             {
                 showAlert(data.message, 'danger');
-                return false;
             }
 
             if(data.status === true && typeof data.message != 'undefined'){
                 showAlert(data.message, 'success');
-                return false;
             }
 
             handleData(data);
