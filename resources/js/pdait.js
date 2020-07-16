@@ -428,3 +428,301 @@ String.prototype.replaceAll = function (search, replacement) {
     var target = this;
     return target.split(search).join(replacement);
 };
+
+/**
+ *Funkcja do obsługi API
+ */
+window.api= function api(url, body, handleData) {
+    body = JSON.stringify(body);
+
+    if (typeof body == "undefined" || body == "") {
+        body = "{}";
+    }
+
+    $.ajax(url, {
+        crossDomain: true,
+        contentType: 'application/json',
+        dataType: "json",
+        type: "POST",
+        data: body,
+        xhrFields: {
+            withCredentials: true
+        },
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("Accept", "application/json");
+            xhr.setRequestHeader("Content-Type", "application/json");
+        },
+        success: function (data) {
+            if (data.action === 'redirect' && typeof data.url !== 'undefined') {
+                document.location.href = data.url
+            }
+
+            if (data.status === true && data.action === 'refresh')
+            {
+                location.reload();
+            }
+
+            if (data.status === false && typeof data.message != 'undefined')
+            {
+                showAlert(data.message, 'danger');
+            }
+
+            if(data.status === true && typeof data.message != 'undefined'){
+                showAlert(data.message, 'success');
+            }
+
+            handleData(data);
+        },
+        error: function (error) {
+
+            if (typeof error.responseJSON.message !== 'undefined')
+            {
+                showAlert(error.responseJSON.message, 'danger');
+            }
+
+        }
+    })
+}
+
+
+/**
+ * Programowalne modale
+ */
+$(() => {
+    let modal
+    let title
+    let body
+    let closeBtn
+    let cancelBtn
+    let okBtn
+    let okTriggers
+    let cancelTriggers
+
+    function setTitle(text) {
+        $(title).text(text)
+    }
+
+    function setMessage(text) {
+        $(body).text(text)
+    }
+
+    function setType(type) {
+        if (type === 'primary') {
+            $(okBtn).addClass('btn-primary')
+        } else if (type === 'danger') {
+            $(okBtn).addClass('btn-danger')
+        }
+    }
+
+    function buildModal() {
+        return $(`<div class="modal fade" id="programmable-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Potwierdzenie wprowadzenia zmian</h5>
+                <button type="button" class="close" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Czy na pewno chcesz kontynuować operacje?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary modal-cancel-btn">Anuluj</button>
+                <button type="button" class="btn btn-primary modal-ok-btn">Tak</button>
+            </div>
+        </div>
+    </div>
+</div>`)
+    }
+
+    function assignNodes() {
+        modal = $('#programmable-modal')
+        title = modal.find('.modal-title')
+        body = modal.find('.modal-body p')
+        closeBtn = modal.find('.close')
+        cancelBtn = modal.find('.modal-cancel-btn')
+        okBtn = modal.find('.modal-ok-btn')
+        okTriggers = [okBtn];
+        cancelTriggers = [cancelBtn, closeBtn]
+    }
+
+    function injectModal() {
+        $('html, body').append(buildModal())
+        assignNodes()
+    }
+
+    function modalPresent() {
+        return modal.length !== 0
+    }
+
+    function openModal() {
+        $(modal).modal({
+            show: true,
+            focus: true,
+            keyboard: false,
+            backdrop: 'static'
+        })
+    }
+
+    function reset() {
+        setTitle('Potwierdzenie wprowadzenia zmian')
+        setMessage('Czy na pewno chcesz kontynuować operacje?')
+        $(okBtn).removeClass('btn-primary').removeClass('btn-danger')
+    }
+
+    function closeModal() {
+        $(modal).modal('hide')
+        reset()
+    }
+
+    function setup(config) {
+        assignNodes()
+
+        if (!modalPresent()) {
+            injectModal()
+        }
+
+        if (config.hasOwnProperty('title')) {
+            setTitle(config.title)
+        }
+
+        if (config.hasOwnProperty('message')) {
+            setMessage(config.message)
+        }
+
+        if (config.hasOwnProperty('type')) {
+            setType(config.type)
+        }
+    }
+
+    /**
+     * Always resolves to true if OK clicked or false if closed or dismissed
+     * @param config Object
+     * @returns {Promise<boolean>}
+     */
+    window.modal = function(config = {}) {
+        setup(config)
+        openModal()
+        return new Promise((resolve) => {
+            for (const trigger of okTriggers) {
+                $(trigger).click(() => {
+                    closeModal()
+                    $(this).off('click')
+                    resolve(true)
+                })
+            }
+
+            for (const trigger of cancelTriggers) {
+                $(trigger).click(() => {
+                    closeModal()
+                    $(this).off('click')
+                    resolve(false)
+                })
+            }
+        })
+    }
+
+})
+
+/**
+ * TableWatcher.js
+ */
+$(() => {
+    const tables = document.querySelectorAll('tbody')
+    const callbacks = []
+
+    if (tables.length > 0) {
+        const config = { attributes: false, childList: true, subtree: false }
+        const callback = () => {
+            for (let callback of callbacks) {
+                callback()
+            }
+        }
+        const observer = new MutationObserver(callback)
+
+        for (const table of tables) {
+            observer.observe(table, config)
+        }
+    }
+
+    window.registerTableWatcher = function (callback) {
+        if (typeof callback === 'function') {
+            callbacks.push(callback)
+        } else {
+            throw new Error('Callback must be a function')
+        }
+    }
+})
+
+/**
+ * TableAjaxDelete.js Łatwe usuwanie wiersza z tabelki po Ajaxie
+ */
+$(() => {
+
+    let modalJs
+
+    if (typeof window.api !== 'function') {
+        throw new Error('API is not available')
+    }
+
+    if (typeof window.modal !== 'function') {
+        console.warn('Modal.js not available, fallback to confim()')
+        modalJs = false
+    } else {
+        modalJs = true
+    }
+
+    function register(e) {
+        const target = $(e.target)
+        const endpointUrl = target.attr('data-url')
+        const parentTable = target.parent().parent().parent().parent().parent()
+        const title = 'Usuwanie wpisu'
+        const message = 'Czy na pewno chcesz usunąć ten wpis?'
+
+        function refreshTable() {
+            $(parentTable).bootstrapTable('refresh', {
+                silence: true
+            })
+        }
+
+        function makeApiCall() {
+            $(target).prop('disabled', true)
+            api(endpointUrl, {}, () => {
+                refreshTable()
+                $(target).prop('disabled', false)
+            })
+        }
+
+        function displayConfirmModal() {
+            if (modalJs) {
+                modal({
+                    title,
+                    message,
+                    type: 'danger'
+                }).then(ok => {
+                    if (ok) {
+                        makeApiCall()
+                    }
+                })
+            } else {
+                const ok = confirm(message)
+                if (ok) {
+                    makeApiCall()
+                }
+            }
+
+        }
+
+        displayConfirmModal()
+    }
+
+    function updateTriggers() {
+        $('[data-func=delete-row]').click(register)
+    }
+
+    registerTableWatcher(() => {
+        updateTriggers()
+    })
+
+})
