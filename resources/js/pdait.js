@@ -682,7 +682,7 @@ $(() => {
 
         function refreshTable() {
             $(parentTable).bootstrapTable('refresh', {
-                silence: true
+                silent: true
             })
         }
 
