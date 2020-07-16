@@ -429,6 +429,63 @@ String.prototype.replaceAll = function (search, replacement) {
     return target.split(search).join(replacement);
 };
 
+/**
+ *Funkcja do obsługi API
+ */
+window.api= function api(url, body, handleData) {
+    body = JSON.stringify(body);
+
+    if (typeof body == "undefined" || body == "") {
+        body = "{}";
+    }
+
+    $.ajax(url, {
+        crossDomain: true,
+        contentType: 'application/json',
+        dataType: "json",
+        type: "POST",
+        data: body,
+        xhrFields: {
+            withCredentials: true
+        },
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("Accept", "application/json");
+            xhr.setRequestHeader("Content-Type", "application/json");
+        },
+        success: function (data) {
+            if (data.action === 'redirect' && typeof data.url !== 'undefined') {
+                document.location.href = data.url
+            }
+
+            if (data.status === true && data.action === 'refresh')
+            {
+                location.reload();
+            }
+
+            if (data.status === false && typeof data.message != 'undefined')
+            {
+                showAlert(data.message, 'danger');
+                return false;
+            }
+
+            if(data.status === true && typeof data.message != 'undefined'){
+                showAlert(data.message, 'success');
+                return false;
+            }
+
+            handleData(data);
+        },
+        error: function (error) {
+
+            if (typeof error.responseJSON.message !== 'undefined')
+            {
+                showAlert(error.responseJSON.message, 'danger');
+            }
+
+        }
+    })
+}
+
 
 /**
  * Programowalne modale
