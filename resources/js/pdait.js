@@ -674,8 +674,8 @@ $(() => {
     }
 
     function register(e) {
-        const target = $(e.target)
-        const endpointUrl = target.attr('data-url')
+        const target = $(e.currentTarget)
+        const endpointUrl = target.attr('data-url') || target.parent().attr('data-url')
         const parentTable = target.parent().parent().parent().parent().parent()
         const title = 'Usuwanie wpisu'
         const message = 'Czy na pewno chcesz usunąć ten wpis?'
