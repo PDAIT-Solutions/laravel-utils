@@ -726,3 +726,50 @@ $(() => {
     })
 
 })
+
+/**
+ * TableParametersInjector.js
+ * Automatyczne wstrzykiwanie  parametrow z GET do filtrow tabeli
+ */
+$(() => {
+    function getParameters() {
+        const rawParams = window.location.search.substring(1).split('&')
+        const params = []
+
+        for (const rawParam of rawParams) {
+            const split = rawParam.split('=')
+            const id = split[0]
+            const value = split[1]
+
+            // Fix na to jak nie ma żadnych parametrów
+            if (id === '') {
+                continue
+            }
+
+            params.push({
+                id,
+                value
+            })
+        }
+
+        return params
+    }
+
+    function injectIfExists(param) {
+        $(`#${param.id}`).val(param.value)
+    }
+
+    function refreshTables() {
+        $('table').bootstrapTable('refresh', {
+            silent: true
+        })
+    }
+
+    const params = getParameters()
+
+    for (const param of params) {
+        injectIfExists(param)
+    }
+
+    refreshTables()
+})
