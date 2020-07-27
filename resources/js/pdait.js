@@ -497,6 +497,11 @@ $(() => {
     let okBtn
     let okTriggers
     let cancelTriggers
+    let inputNodes = []
+    const labelTemplate = `<label for="{{name}}" style="margin-top:20px;">{{label}}</label>`
+    const inputTemplate = `<input type="{{type}}" name="{{name}}" placeholder="{{placeholder}}" value="{{value}}" class="form-control">`
+    const selectTemplate = `<select type="text" name="{{name}}" class="form-control"></select>`
+    const optionTemplate = `<option value="{{value}}">{{name}}</option>`
 
     function setTitle(text) {
         $(title).text(text)
@@ -511,6 +516,73 @@ $(() => {
             $(okBtn).addClass('btn-primary')
         } else if (type === 'danger') {
             $(okBtn).addClass('btn-danger')
+        }
+    }
+
+    function createOption(value, name) {
+        let option = optionTemplate.repeat(1)
+        option = option.replace('{{value}}', value)
+        option = option.replace('{{name}}', name)
+
+        return $(option)
+    }
+
+    function createLabel(labelFor, text) {
+        let label = labelTemplate.repeat(1)
+        label = label.replace('{{name}}', labelFor)
+        label = label.replace('{{label}}', text)
+
+        return $(label)
+    }
+
+    function createInput(data) {
+        const id = data.id
+        const placeholder = data.placeholder || ''
+        const value = data.value || ''
+        const label = data.label || ''
+        const type = data.type || 'text'
+        let input = inputTemplate.repeat(1)
+        input = input.replace(/{{name}}/g, id)
+        input = input.replace('{{placeholder}}', placeholder)
+        input = input.replace('{{value}}', value)
+        input = input.replace('{{label}}', label)
+        input = input.replace('{{type}}', type)
+        input = $(input)
+        $(input).val(value)
+
+        return input
+    }
+
+
+    function createSelect(data) {
+        let select = selectTemplate.replace('{{name}}', data.id)
+        select = $(select)
+
+        data.options.map(option => select.append(createOption(option.value, option.name)))
+
+        return select
+    }
+
+    function setInputs(inputs) {
+        for (const input of inputs) {
+            const type = input.type || 'input'
+            const label = input.label || false
+            const body = $('#programmable-modal .modal-body')
+            let inputNode
+
+            if (type === 'select') {
+                inputNode = createSelect(input)
+            } else {
+                inputNode = createInput(input)
+            }
+
+            inputNodes.push(inputNode)
+
+            if (label) {
+                body.append(createLabel(input.id, label))
+            }
+
+            body.append(inputNode)
         }
     }
 
@@ -569,6 +641,8 @@ $(() => {
         setTitle('Potwierdzenie wprowadzenia zmian')
         setMessage('Czy na pewno chcesz kontynuować operacje?')
         $(okBtn).removeClass('btn-primary').removeClass('btn-danger')
+        inputNodes.splice(0, inputNodes.length)
+        $('#programmable-modal .modal-body').html('<p>Czy na pewno chcesz kontynuować operacje?</p>')
     }
 
     function closeModal() {
@@ -594,6 +668,21 @@ $(() => {
         if (config.hasOwnProperty('type')) {
             setType(config.type)
         }
+
+        if (config.hasOwnProperty('inputs')) {
+            setInputs(config.inputs)
+        }
+    }
+
+    function gatherInputsData() {
+        let data = {}
+
+        for (const node of inputNodes) {
+            const name = $(node).attr('name')
+            data[name] = $(`#programmable-modal [name='${name}']`).val()
+        }
+
+        return data
     }
 
     /**
@@ -607,17 +696,18 @@ $(() => {
         return new Promise((resolve) => {
             for (const trigger of okTriggers) {
                 $(trigger).click(() => {
+                    const inputsData = gatherInputsData()
                     closeModal()
-                    $(this).off('click')
-                    resolve(true)
+                    $(trigger).off('click')
+                    resolve({ ok: true, data: inputsData })
                 })
             }
 
             for (const trigger of cancelTriggers) {
                 $(trigger).click(() => {
                     closeModal()
-                    $(this).off('click')
-                    resolve(false)
+                    $(trigger).off('click')
+                    resolve({ ok: false, data: {} })
                 })
             }
         })
@@ -725,4 +815,51 @@ $(() => {
         updateTriggers()
     })
 
+})
+
+/**
+ * TableParametersInjector.js
+ * Automatyczne wstrzykiwanie  parametrow z GET do filtrow tabeli
+ */
+$(() => {
+    function getParameters() {
+        const rawParams = window.location.search.substring(1).split('&')
+        const params = []
+
+        for (const rawParam of rawParams) {
+            const split = rawParam.split('=')
+            const id = split[0]
+            const value = split[1]
+
+            // Fix na to jak nie ma żadnych parametrów
+            if (id === '') {
+                continue
+            }
+
+            params.push({
+                id,
+                value
+            })
+        }
+
+        return params
+    }
+
+    function injectIfExists(param) {
+        $(`#${param.id}`).val(param.value)
+    }
+
+    function refreshTables() {
+        $('table').bootstrapTable('refresh', {
+            silent: true
+        })
+    }
+
+    const params = getParameters()
+
+    for (const param of params) {
+        injectIfExists(param)
+    }
+
+    refreshTables()
 })
