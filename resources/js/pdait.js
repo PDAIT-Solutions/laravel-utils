@@ -790,8 +790,8 @@ $(() => {
                     title,
                     message,
                     type: 'danger'
-                }).then(ok => {
-                    if (ok) {
+                }).then(data => {
+                    if (data.ok) {
                         makeApiCall()
                     }
                 })
