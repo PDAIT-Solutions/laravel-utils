@@ -724,9 +724,14 @@ $(() => {
 
     if (tables.length > 0) {
         const config = { attributes: false, childList: true, subtree: false }
-        const callback = () => {
+        const callback = (mutationList) => {
+            let targetId = ''
+            if (mutationList[0].target.parentNode !== null) {
+                targetId = mutationList[0].target.parentNode.id
+            }
+
             for (let callback of callbacks) {
-                callback()
+                callback(targetId, mutationList)
             }
         }
         const observer = new MutationObserver(callback)
